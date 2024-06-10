@@ -117,11 +117,11 @@ module ExceptionNotifier
       current_log_file = "#{current_log_date}/#{endcode}.json"
       
       if File.exist?(current_log_file)
-        json_file =  File.read(current_log_file)
-        json_file = json_file.to_json
+        json_file = File.read(current_log_file)
+        json_file = JSON.parse json_file
         last_time = File.ctime(current_log_file)   #=> Wed Apr 09 08:53:13 CDT 2003
 
-        count = last_time < @options[:expires_in_stop_send].ago ? 0 : (count + 1)
+        count = last_time < @options[:expires_in_stop_send].ago ? 0 : (json_file["count"].to_i + 1)
         is_valid_send = count < @options[:count_limit]
         tmp_data_log[:count] = count
       else 
@@ -129,7 +129,7 @@ module ExceptionNotifier
       end
 
       @file_path_json = current_log_file
-
+      
       File.open(current_log_file,"w") do |f|
         f.write(tmp_data_log.to_json)
       end
